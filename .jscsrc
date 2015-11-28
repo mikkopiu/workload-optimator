@@ -47,7 +47,8 @@
     "requireSpaceBeforeBlockStatements": true,
     "requireSpaceBeforeKeywords": ["else", "while", "catch"],
     "requireSpacesInAnonymousFunctionExpression": {
-        "beforeOpeningRoundBrace": true
+        "beforeOpeningRoundBrace": true,
+        "allExcept": ['shorthand']
     },
     "requireSpacesInFunction": {
         "beforeOpeningCurlyBrace": true
