@@ -1,0 +1,32 @@
+@charset "UTF-8";
+@import (reference) "main";
+
+@headerBgColour: #FFF;
+
+header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    height: @headerFooterHeight;
+    width: 100%;
+    position: fixed;
+    top: 0;
+
+    background: @headerBgColour;
+}
+
+.page-header {
+    -ms-word-break: break-all;
+    word-break: break-all;
+
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    margin: 0 1rem;
+    padding: 1rem 0;
+}

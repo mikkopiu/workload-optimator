@@ -1,3 +1,117 @@
+@charset "UTF-8";
+
+@bgColour: #fc6e69;
+@headerFooterHeight: 5rem;
+@textColour: #333;
+
+// BASE STYLES
+
 *, *::after, *::before {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
+
+html, body {
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    background: @bgColour;
+    font-family: 'Sintony', sans-serif;
+    color: @textColour;
+}
+
+button {
+
+    font-family: 'Sintony', sans-serif;;
+    font-weight: 700;
+    text-transform: uppercase;
+
+    padding: 0.5rem;
+    float: left;
+    border-radius: 5px;
+    text-decoration: none;
+    background-color: #fff;
+    box-shadow: rgba(0,0,0, 0.2) 0 0 2px;
+    text-shadow: 1px 1px 1px rgba(51, 51, 51, 0.1);
+    color: @textColour;
+    outline: none;
+
+    transition: all 0.1s;
+
+    &:active {
+        border-style: solid;
+        box-shadow: rgba(0,0,0, 0.5) 0 0 10px;
+    }
+}
+
+input[type='text'], input[type='number'] {
+    width: 100%;
+
+    font-family: 'Sintony', sans-serif;;
+    padding: 0.5rem;
+    border: solid 1px #E5E5E5;
+    outline: 0;
+    background: #FFFFFF;
+    border-radius: 2px;
+    box-shadow: rgba(0,0,0, 0.2) 0 0 2px;
+
+    &:focus {
+        border-color: #656565;
+        box-shadow: rgba(0,0,0, 0.5) 0 0 10px;
+
+        -webkit-transition: box-shadow 250ms;
+        -moz-transition: box-shadow 250ms;
+        -ms-transition: box-shadow 250ms;
+        -o-transition: box-shadow 250ms;
+        transition: box-shadow 250ms;
+    }
+}
+
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+td, th {
+    padding: 0.5rem;
+    vertical-align: middle;
+
+    &:first-child {
+        padding-left: 0;
+    }
+
+    &:last-child {
+        padding-right: 0;
+    }
+}
+
+thead {
+    border-bottom: 1px solid #333;
+}
+
+tbody tr {
+    border-bottom: 1px dashed #eee;
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+tfoot {
+    border-top: 1px solid #555;
+}
+
+th {
+    text-align: left;
+    font-weight: 700;
+}
+
+// APP STYLES
+
+@import "header";
+@import "content";
+@import "footer";

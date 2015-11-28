@@ -2,12 +2,96 @@
 <html lang="fi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <title>MyWorkLoadOptimator - Mikko Piuhola - Digitaalisen median algoritmit</title>
+
+    <!-- CSS libs -->
+    <link href='https://fonts.googleapis.com/css?family=Sintony' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Playfair+Display:700italic' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css" type="text/css">
+
+    <!-- App styles -->
     <link rel="stylesheet" href="dist/css/main.css" type="text/css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 </head>
 <body>
+<header>
+    <h1 class="page-header">MyWorkLoadOptimator</h1>
+</header>
 
+<main class="content">
+    <section class="instructions">
+        <p>Input all your available courses and set an amount of hours you have to fit them in</p>
+    </section>
+    <section class="input-form">
+        <form id="courses-form" name="courses-form">
+            <div class="total-hours">
+                <label for="total-hours-input">Total amount of hours to fill</label>
+                <input id="total-hours-input" name="total-hours" type="number" placeholder="Full hours">
+            </div>
+            <div class="courses">
+                <table>
+                    <thead>
+                    <tr>
+                        <th class="course">Course</th>
+                        <th class="points">Points</th>
+                        <th class="work">Work (h)</th>
+                        <th class="actions"></th>
+                    </tr>
+                    </thead>
+                    <tbody id="courses-table-body">
+                    <tr class="input-row">
+                        <td>
+                            <input class="input-name" type="text" placeholder="Course name" required>
+                        </td>
+                        <td>
+                            <input class="input-points" type="number" min="0" placeholder="Course points" required>
+                        </td>
+                        <td>
+                            <input class="input-work" type="number" min="0" placeholder="Work required in hours" required>
+                        </td>
+                        <td>
+                            <button type="button">Remove</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-actions">
+                <button type="button">Add row</button>
+                <button type="submit">Optimize</button>
+            </div>
+        </form>
+    </section>
+    <section class="results">
+        <h2>Optimized course selections</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>Course</th>
+                <th>Points</th>
+                <th>Work (h)</th>
+            </tr>
+            </thead>
+            <tbody id="results-table-body">
+            </tbody>
+            <tfoot>
+            <tr>
+                <td>Total</td>
+                <td id="total-points"></td>
+                <td id="total-work"></td>
+            </tr>
+            </tfoot>
+        </table>
+    </section>
+</main>
+
+<footer>
+    <span class="copyright">Mikko Piuhola 2015</span>
+    <span class="course-info">Digitaalisen median algoritmit TV00AA07-3003</span>
+</footer>
+
+<!-- App scripts -->
 <script src="dist/js/main-compiled.js"></script>
 </body>
 </html>

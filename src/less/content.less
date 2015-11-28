@@ -1,0 +1,87 @@
+@charset "UTF-8";
+@import (reference) "main";
+
+@contentBgColour: #fc6e69;
+@contentHorizontalPadding: 4rem;
+@contentVerticalPadding: @headerFooterHeight + 2.5rem;
+
+.content {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    min-height: 100%;
+    padding: @contentVerticalPadding @contentHorizontalPadding;
+
+    background: @contentBgColour;
+
+    h2 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 2rem;
+    }
+}
+
+section {
+    width: 100%;
+
+    margin-bottom: 2rem;
+    float: left;
+    clear: both;
+}
+
+.instructions {
+    p {
+
+    }
+}
+
+#courses-form {
+    width: 100%;
+    float: left;
+}
+
+.courses, .form-actions, .total-hours {
+    width: 100%;
+    float: left;
+    clear: both;
+    margin-bottom: 1rem;
+}
+
+.courses {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #555;
+}
+
+// Courses-table columns
+
+.points, .work {
+    width: 200px;
+}
+.course {
+    min-width: 40%;
+}
+.actions {
+    width: 80px;
+}
+
+.form-actions {
+    button {
+        margin-right: 1rem;
+    }
+}
+
+.total-hours {
+    label {
+        font-weight: 700;
+        float: left;
+        clear: both;
+        margin-bottom: 0.5rem;
+    }
+}
+
+#total-hours-input {
+    max-width: 200px;
+    float: left;
+    clear: both;
+}
