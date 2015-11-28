@@ -1,0 +1,59 @@
+{
+    "esnext": true,
+    "disallowEmptyBlocks": true,
+    "disallowKeywordsOnNewLine": ["else"],
+    "disallowMixedSpacesAndTabs": true,
+    "disallowNewlineBeforeBlockStatements": true,
+    "disallowSpaceAfterPrefixUnaryOperators": true,
+    "disallowSpaceBeforePostfixUnaryOperators": true,
+    "disallowSpaceBeforeSemicolon": true,
+    "disallowSpacesInCallExpression": true,
+    "disallowSpacesInFunctionDeclaration": {
+        "beforeOpeningRoundBrace": true
+    },
+    "disallowSpacesInNamedFunctionExpression": {
+        "beforeOpeningRoundBrace": true
+    },
+    "disallowTrailingComma": true,
+    "disallowYodaConditions": true,
+    "jsDoc": {
+        "checkAnnotations": true,
+        "checkParamExistence": true,
+        "checkParamNames": true,
+        "checkRedundantParams": true,
+        "checkReturnTypes": true,
+        "checkRedundantReturns": true,
+        "checkTypes": true
+    },
+    "maximumLineLength": {
+        "value": 121,
+        "allExcept": ["regex", "comments", "urlComments", "functionSignature"]
+    },
+    "requireBlocksOnNewline": 1,
+    "requireCamelCaseOrUpperCaseIdentifiers": "ignoreProperties",
+    "requireCapitalizedConstructors": true,
+    "requireCurlyBraces": true,
+    "requireDollarBeforejQueryAssignment": true,
+    "requireDotNotation": {
+        "allExcept": ["snake_case", "keywords"]
+    },
+    "requireLineFeedAtFileEnd": true,
+    "requireMatchingFunctionName": true,
+    "requireOperatorBeforeLineBreak": true,
+    "requireParenthesesAroundIIFE": true,
+    "requireSemicolons": true,
+    "requireShorthandArrowFunctions": true,
+    "requireSpaceAfterKeywords": true,
+    "requireSpaceBeforeBlockStatements": true,
+    "requireSpaceBeforeKeywords": ["else", "while", "catch"],
+    "requireSpacesInAnonymousFunctionExpression": {
+        "beforeOpeningRoundBrace": true
+    },
+    "requireSpacesInFunction": {
+        "beforeOpeningCurlyBrace": true
+    },
+    "requireSpacesInForStatement": true,
+    "safeContextKeyword": ["_self"],
+    "validateIndentation": 4,
+    "validateQuoteMarks": { "mark": "'", "escape": true }
+}
