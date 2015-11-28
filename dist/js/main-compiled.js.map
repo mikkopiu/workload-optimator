@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/js/main.js"],"names":[],"mappings":";;AAAA,CAAC,YAAY;AACT,gBAAY,CAAC;;AAEb,aAAS,IAAI,GAAG,EAEf;;AAED,QAAI,EAAE,CAAC;CACV,CAAA,EAAG,CAAC","file":"main-compiled.js","sourcesContent":["(function () {\r\n    'use strict';\r\n\r\n    function main() {\r\n\r\n    }\r\n\r\n    main();\r\n})();\r\n"]}
