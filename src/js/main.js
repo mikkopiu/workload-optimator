@@ -144,14 +144,12 @@
     }
 
     class OptimatorForm {
-        /* jshint ignore:start */
         constructor({courses = [], maxHours = 0} = {}) {
             this.optimator = new Optimator(courses, maxHours);
             this._onSubmit = this._onSubmit.bind(this);
             this._onAddRow = this._onAddRow.bind(this);
             this._onRemoveRow = this._onRemoveRow.bind(this);
         }
-        /* jshint ignore:end */
 
         /**
          * Init the form.

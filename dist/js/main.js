@@ -185,8 +185,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     })();
 
     var OptimatorForm = (function () {
-        /* jshint ignore:start */
-
         function OptimatorForm() {
             var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -202,7 +200,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             this._onAddRow = this._onAddRow.bind(this);
             this._onRemoveRow = this._onRemoveRow.bind(this);
         }
-        /* jshint ignore:end */
 
         /**
          * Init the form.
