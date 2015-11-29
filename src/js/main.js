@@ -102,31 +102,90 @@
 
         /**
          * Optimize course selections
-         * @returns {{keep: Array, totalPts: number, totalWork: number}}
+         * @returns {{optimized: Array, totalPts: number, totalWork: number}}
          */
         getOptimizedCourses() {
-            let v = [];
-            let keep = [];
             let totalPts = 0;
             let totalWork = 0;
+            let optimized = []; // Final, optimized set of Courses
+
+            let numCourses = this.courses.length;
+
 
             // Skip the algorithm completely if there aren't any courses or
             // if we don't have any hours to fill up
-            if (this.maxHours > 0 && this.courses.length > 0) {
+            if (this.maxHours > 0 && numCourses > 0) {
 
-                // No need for the algorithm also
-                // if we only have one course to fit.
-                if (this.courses.length === 1) {
-                    keep.push(this.courses[0]);
+                // No need for the algorithm
+                // if we only have one Course that fits.
+                // But bail out if there's only one Course and it doesn't fit.
+                if (numCourses === 1 && this.courses[0].work <= this.maxHours) {
                     totalPts = this.courses[0].points;
                     totalWork = this.courses[0].work;
-                } else {
-                    // TODO: actual work
-                    console.warn('Doing actual work');
+                    optimized.push(this.courses[0]);
+                } else if (numCourses > 1) {
+
+                    /**
+                     * The Knapsack algorithm
+                     */
+
+                    let courseInd;
+                    let workInd = 0;
+                    let maxPrev = 0;
+                    let maxNew = 0;
+
+                    // Setup matrices (create (numCourses + 1) * (maxHours +1) sized empty Arrays)
+                    let weightMatrix = Array.apply(null, Array(numCourses + 1))
+                        .map(() => new Array(this.maxHours + 1));
+                    let keepMatrix = Array.apply(null, Array(numCourses + 1))
+                        .map(() => new Array(this.maxHours + 1));
+
+                    // Build weightMatrix from [0][0] => [numCourses-1][numCourses-1]
+                    for (courseInd = 0; courseInd <= numCourses; courseInd++) {
+                        for (workInd = 0; workInd <= this.maxHours; workInd++) {
+
+                            // Fill top row and left column with zeros
+                            if (courseInd === 0 || workInd === 0) {
+                                weightMatrix[courseInd][workInd] = 0;
+                            } else if (this.courses[courseInd - 1].work <= workInd) {
+                                // If item will fit, decide if there's greater value
+                                // in keeping it, or leaving it.
+                                maxNew = this.courses[courseInd - 1].points +
+                                    weightMatrix[courseInd - 1][workInd - this.courses[courseInd - 1].work];
+                                maxPrev = weightMatrix[courseInd - 1][workInd];
+
+                                // Update the matrices
+                                if (maxNew > maxPrev) {
+                                    weightMatrix[courseInd][workInd] = maxNew;
+                                    keepMatrix[courseInd][workInd] = 1;
+                                } else {
+                                    weightMatrix[courseInd][workInd] = maxPrev;
+                                    keepMatrix[courseInd][workInd] = 0;
+                                }
+                            } else {
+                                // Else, the course can't fit
+                                // => points and work are the same as before.
+                                weightMatrix[courseInd][workInd] = weightMatrix[courseInd - 1][workInd];
+                            }
+                        }
+                    }
+
+                    // Traverse through keepMatrix ([numItems][capacity] -> [1][?])
+                    // to create the optimized set of courses.
+                    workInd = this.maxHours;
+                    courseInd = numCourses;
+                    for (courseInd; courseInd > 0; courseInd--) {
+                        if (keepMatrix[courseInd][workInd] === 1) {
+                            optimized.push(this.courses[courseInd - 1]);
+                            workInd = workInd - this.courses[courseInd - 1].work;
+                        }
+                    }
+
+                    totalPts = weightMatrix[numCourses][this.maxHours];
                 }
             }
 
-            return {keep, totalPts, totalWork};
+            return {optimized, totalPts, totalWork};
         }
 
         /**
@@ -337,7 +396,7 @@
                 ));
             }
 
-            let {keep:optimized, totalPts, totalWork} = this.optimator.getOptimizedCourses();
+            let {optimized, totalPts, totalWork} = this.optimator.getOptimizedCourses();
             this._printResults(optimized, totalPts, totalWork);
         }
 

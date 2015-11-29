@@ -87,31 +87,92 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
             /**
              * Optimize course selections
-             * @returns {{keep: Array, totalPts: number, totalWork: number}}
+             * @returns {{optimized: Array, totalPts: number, totalWork: number}}
              */
             value: function getOptimizedCourses() {
-                var v = [];
-                var keep = [];
+                var _this = this;
+
                 var totalPts = 0;
                 var totalWork = 0;
+                var optimized = []; // Final, optimized set of Courses
+
+                var numCourses = this.courses.length;
 
                 // Skip the algorithm completely if there aren't any courses or
                 // if we don't have any hours to fill up
-                if (this.maxHours > 0 && this.courses.length > 0) {
+                if (this.maxHours > 0 && numCourses > 0) {
 
-                    // No need for the algorithm also
-                    // if we only have one course to fit.
-                    if (this.courses.length === 1) {
-                        keep.push(this.courses[0]);
+                    // No need for the algorithm
+                    // if we only have one Course that fits.
+                    // But bail out if there's only one Course and it doesn't fit.
+                    if (numCourses === 1 && this.courses[0].work <= this.maxHours) {
                         totalPts = this.courses[0].points;
                         totalWork = this.courses[0].work;
-                    } else {
-                        // TODO: actual work
-                        console.warn('Doing actual work');
+                        optimized.push(this.courses[0]);
+                    } else if (numCourses > 1) {
+
+                        /**
+                         * The Knapsack algorithm
+                         */
+
+                        var courseInd = undefined;
+                        var workInd = 0;
+                        var maxPrev = 0;
+                        var maxNew = 0;
+
+                        // Setup matrices (create (numCourses + 1) * (maxHours +1) sized empty Arrays)
+                        var weightMatrix = Array.apply(null, Array(numCourses + 1)).map(function () {
+                            return new Array(_this.maxHours + 1);
+                        });
+                        var keepMatrix = Array.apply(null, Array(numCourses + 1)).map(function () {
+                            return new Array(_this.maxHours + 1);
+                        });
+
+                        // Build weightMatrix from [0][0] => [numCourses-1][numCourses-1]
+                        for (courseInd = 0; courseInd <= numCourses; courseInd++) {
+                            for (workInd = 0; workInd <= this.maxHours; workInd++) {
+
+                                // Fill top row and left column with zeros
+                                if (courseInd === 0 || workInd === 0) {
+                                    weightMatrix[courseInd][workInd] = 0;
+                                } else if (this.courses[courseInd - 1].work <= workInd) {
+                                    // If item will fit, decide if there's greater value
+                                    // in keeping it, or leaving it.
+                                    maxNew = this.courses[courseInd - 1].points + weightMatrix[courseInd - 1][workInd - this.courses[courseInd - 1].work];
+                                    maxPrev = weightMatrix[courseInd - 1][workInd];
+
+                                    // Update the matrices
+                                    if (maxNew > maxPrev) {
+                                        weightMatrix[courseInd][workInd] = maxNew;
+                                        keepMatrix[courseInd][workInd] = 1;
+                                    } else {
+                                        weightMatrix[courseInd][workInd] = maxPrev;
+                                        keepMatrix[courseInd][workInd] = 0;
+                                    }
+                                } else {
+                                    // Else, the course can't fit
+                                    // => points and work are the same as before.
+                                    weightMatrix[courseInd][workInd] = weightMatrix[courseInd - 1][workInd];
+                                }
+                            }
+                        }
+
+                        // Traverse through keepMatrix ([numItems][capacity] -> [1][?])
+                        // to create the optimized set of courses.
+                        workInd = this.maxHours;
+                        courseInd = numCourses;
+                        for (courseInd; courseInd > 0; courseInd--) {
+                            if (keepMatrix[courseInd][workInd] === 1) {
+                                optimized.push(this.courses[courseInd - 1]);
+                                workInd = workInd - this.courses[courseInd - 1].work;
+                            }
+                        }
+
+                        totalPts = weightMatrix[numCourses][this.maxHours];
                     }
                 }
 
-                return { keep: keep, totalPts: totalPts, totalWork: totalWork };
+                return { optimized: optimized, totalPts: totalPts, totalWork: totalWork };
             }
 
             /**
@@ -370,7 +431,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                 var _optimator$getOptimiz = this.optimator.getOptimizedCourses();
 
-                var optimized = _optimator$getOptimiz.keep;
+                var optimized = _optimator$getOptimiz.optimized;
                 var totalPts = _optimator$getOptimiz.totalPts;
                 var totalWork = _optimator$getOptimiz.totalWork;
 
