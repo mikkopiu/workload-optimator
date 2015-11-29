@@ -36,17 +36,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
         _createClass(Course, [{
             key: 'points',
-            get: function get() {
-                return this._points;
-            },
             set: function set(p) {
                 this._points = p >= 0 ? p : 0;
             }
         }, {
             key: 'work',
-            get: function get() {
-                return this._work;
-            },
             set: function set(p) {
                 this._work = p >= 0 ? p : 0;
             }
@@ -232,6 +226,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         return Optimator;
     })();
 
+    /**
+     * OptimatorForm handles user input and making the optimizations through an Optimator instance.
+     * It also outputs all results to the page.
+     *
+     * @class
+     */
+
     var OptimatorForm = (function () {
         function OptimatorForm() {
             var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
@@ -300,6 +301,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var targetRow = this.coursesEl.querySelectorAll('tr')[ind];
                 this.coursesEl.removeChild(targetRow);
             }
+
+            /**
+             * Handle optimize-worker messages (on complete)
+             * @param {Object} data
+             * @private
+             */
+
         }, {
             key: '_onOptimizeWorkerComplete',
             value: function _onOptimizeWorkerComplete() {
@@ -362,8 +370,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     this.optimator.addCourse(new Course(rows[i].querySelector('.input-name').value, OptimatorForm._parseToPositiveFloat(rows[i].querySelector('.input-points').value), OptimatorForm._parseToPositiveFloat(rows[i].querySelector('.input-work').value)));
                 }
 
+                // Add a spinner while the calculation is going on
                 this.resultsBodyEl.innerHTML = '<tr>\n                <td colspan="3" style="text-align: center"><div class="spinner-loader">Loading&hellip;</div></td>\n            </tr>';
 
+                // Once done, the results will be handled in _onOptimizeWorkerComplete
                 this.optimator.startOptimization();
             }
 

@@ -23,16 +23,8 @@
             this.work = work;
         }
 
-        get points() {
-            return this._points;
-        }
-
         set points(p) {
             this._points = p >= 0 ? p : 0;
-        }
-
-        get work() {
-            return this._work;
         }
 
         set work(p) {
@@ -178,6 +170,12 @@
         }
     }
 
+    /**
+     * OptimatorForm handles user input and making the optimizations through an Optimator instance.
+     * It also outputs all results to the page.
+     *
+     * @class
+     */
     class OptimatorForm {
         constructor({courses = [], maxHours = 0} = {}) {
             this.optimator = new Optimator(courses, maxHours);
@@ -275,6 +273,11 @@
             this.coursesEl.removeChild(targetRow);
         }
 
+        /**
+         * Handle optimize-worker messages (on complete)
+         * @param {Object} data
+         * @private
+         */
         _onOptimizeWorkerComplete({data} = {}) {
             let {optimized, totalPts, totalWork} = data;
             this._printResults(optimized, totalPts, totalWork);
@@ -324,10 +327,12 @@
                 ));
             }
 
+            // Add a spinner while the calculation is going on
             this.resultsBodyEl.innerHTML = `<tr>
                 <td colspan="3" style="text-align: center"><div class="spinner-loader">Loading&hellip;</div></td>
             </tr>`;
 
+            // Once done, the results will be handled in _onOptimizeWorkerComplete
             this.optimator.startOptimization();
         }
 

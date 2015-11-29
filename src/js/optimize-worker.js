@@ -98,19 +98,19 @@ function optimize(courses, maxHours) {
                     }
                 }
             }
-            //// Traverse through keepMatrix ([numItems][capacity] -> [1][?])
-            //// to create the optimized set of courses.
-            //workInd = maxHours;
-            //courseInd = numCourses;
-            //for (courseInd; courseInd > 0; courseInd--) {
-            //    if (keepMatrix[courseInd][workInd] === 1) {
-            //        optimized.push(courses[courseInd - 1]);
-            //        totalWork += courses[courseInd - 1]._work;
-            //        workInd = workInd - courses[courseInd - 1]._work;
-            //    }
-            //}
-            //
-            //totalPts = workMatrix[numCourses][maxHours];
+            // Traverse through keepMatrix ([numItems][capacity] -> [1][?])
+            // to create the optimized set of courses.
+            workInd = maxHours;
+            courseInd = numCourses;
+            for (courseInd; courseInd > 0; courseInd--) {
+                if (keepMatrix[courseInd][workInd] === 1) {
+                    optimized.push(courses[courseInd - 1]);
+                    totalWork += courses[courseInd - 1]._work;
+                    workInd = workInd - courses[courseInd - 1]._work;
+                }
+            }
+
+            totalPts = workMatrix[numCourses][maxHours];
         }
     }
 
