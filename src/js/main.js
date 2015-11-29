@@ -58,6 +58,7 @@
         constructor(courses = [], maxHours = 0) {
             this.courses = courses;
             this.maxHours = maxHours;
+            this._worker = new Worker('dist/js/optimize-worker.js');
         }
 
         get maxHours() {
@@ -100,96 +101,15 @@
             }
         }
 
+        get worker() {
+            return this._worker;
+        }
+
         /**
-         * Optimize course selections
-         * @returns {{optimized: Array, totalPts: number, totalWork: number}}
+         * Optimize course selections with a Web Worker
          */
-        getOptimizedCourses() {
-            let totalPts = 0;
-            let totalWork = 0;
-            let optimized = []; // Final, optimized set of Courses
-
-            let numCourses = this.courses.length;
-
-
-            // Skip the algorithm completely if there aren't any courses or
-            // if we don't have any hours to fill up
-            if (this.maxHours > 0 && numCourses > 0) {
-
-                // No need for the algorithm
-                // if we only have one Course that fits.
-                // But bail out if there's only one Course and it doesn't fit.
-                if (numCourses === 1 && this.courses[0].work <= this.maxHours) {
-                    totalPts = this.courses[0].points;
-                    totalWork = this.courses[0].work;
-                    optimized.push(this.courses[0]);
-                } else if (numCourses > 1) {
-
-                    /**
-                     * The Knapsack algorithm
-                     * Based on:
-                     * https://www.youtube.com/watch?v=EH6h7WA7sDw &
-                     * https://gist.github.com/danwoods/7496329
-                     */
-
-                    let courseInd;
-                    let workInd;
-                    let maxPrev;
-                    let maxNew;
-
-                    // Setup matrices (create (numCourses + 1) * (maxHours +1) sized empty Arrays)
-                    let workMatrix = Array.apply(null, Array(numCourses + 1))
-                        .map(() => new Array(this.maxHours + 1));
-                    let keepMatrix = Array.apply(null, Array(numCourses + 1))
-                        .map(() => new Array(this.maxHours + 1));
-
-                    // Build the workMatrix
-                    for (courseInd = 0; courseInd <= numCourses; courseInd++) {
-                        for (workInd = 0; workInd <= this.maxHours; workInd++) {
-
-                            // Fill top row (representing a knapsack that can fit 0 hours of work)
-                            // and left column with zeros.
-                            if (courseInd === 0 || workInd === 0) {
-                                workMatrix[courseInd][workInd] = 0;
-                            } else if (this.courses[courseInd - 1].work <= workInd) {
-                                // If the Course will fit, compare the values of keeping it or leaving it
-                                maxNew = this.courses[courseInd - 1].points +
-                                    workMatrix[courseInd - 1][workInd - this.courses[courseInd - 1].work];
-                                maxPrev = workMatrix[courseInd - 1][workInd];
-
-                                // Update the matrices
-                                if (maxNew > maxPrev) {
-                                    workMatrix[courseInd][workInd] = maxNew;
-                                    keepMatrix[courseInd][workInd] = 1;
-                                } else {
-                                    workMatrix[courseInd][workInd] = maxPrev;
-                                    keepMatrix[courseInd][workInd] = 0;
-                                }
-                            } else {
-                                // Else, the course can't fit
-                                // => points and work are the same as before.
-                                workMatrix[courseInd][workInd] = workMatrix[courseInd - 1][workInd];
-                            }
-                        }
-                    }
-
-                    // Traverse through keepMatrix ([numItems][capacity] -> [1][?])
-                    // to create the optimized set of courses.
-                    workInd = this.maxHours;
-                    courseInd = numCourses;
-                    for (courseInd; courseInd > 0; courseInd--) {
-                        if (keepMatrix[courseInd][workInd] === 1) {
-                            optimized.push(this.courses[courseInd - 1]);
-                            totalWork += this.courses[courseInd - 1].work;
-                            workInd = workInd - this.courses[courseInd - 1].work;
-                        }
-                    }
-
-                    totalPts = workMatrix[numCourses][this.maxHours];
-                }
-            }
-
-            return {optimized, totalPts, totalWork};
+        startOptimization() {
+            this.worker.postMessage({'cmd': 'start', 'courses': this.courses, 'maxHours': this.maxHours});
         }
 
         /**
@@ -261,15 +181,13 @@
     class OptimatorForm {
         constructor({courses = [], maxHours = 0} = {}) {
             this.optimator = new Optimator(courses, maxHours);
+
+            this._onOptimizeWorkerComplete = this._onOptimizeWorkerComplete.bind(this);
             this._onSubmit = this._onSubmit.bind(this);
             this._onAddRow = this._onAddRow.bind(this);
             this._onRemoveRow = this._onRemoveRow.bind(this);
         }
 
-        /**
-         * Init the form.
-         * Sets event listeners.
-         */
         init() {
             let addBtn = document.getElementById('add-btn');
             this._totalHoursInputEl = document.getElementById('total-hours-input');
@@ -278,10 +196,11 @@
             this._resultsBodyEl = document.getElementById('results-table-body');
             this._totalPointsEl = document.getElementById('total-points');
             this._totalWorkEl = document.getElementById('total-work');
-
             let initialRowDeleteBtn = this.coursesEl.querySelector('.remove-btn');
 
-            // Clear out any previous listeners
+            // Create event listeners (and remove any previous listeners)
+            this.optimator.worker.removeEventListener('message', this._onOptimizeWorkerComplete);
+            this.optimator.worker.addEventListener('message', this._onOptimizeWorkerComplete);
             this._formEl.removeEventListener('submit', this._onSubmit);
             this._formEl.addEventListener('submit', this._onSubmit);
             addBtn.removeEventListener('click', this._onAddRow);
@@ -356,6 +275,11 @@
             this.coursesEl.removeChild(targetRow);
         }
 
+        _onOptimizeWorkerComplete({data} = {}) {
+            let {optimized, totalPts, totalWork} = data;
+            this._printResults(optimized, totalPts, totalWork);
+        }
+
         /**
          * Add row -button handler
          * @param {MouseEvent} evt
@@ -400,8 +324,11 @@
                 ));
             }
 
-            let {optimized, totalPts, totalWork} = this.optimator.getOptimizedCourses();
-            this._printResults(optimized, totalPts, totalWork);
+            this.resultsBodyEl.innerHTML = `<tr>
+                <td colspan="3" style="text-align: center"><div class="spinner-loader">Loading&hellip;</div></td>
+            </tr>`;
+
+            this.optimator.startOptimization();
         }
 
         /**
@@ -434,12 +361,14 @@
         _printResults(data, totalPoints, totalWork) {
             let output = '';
 
+            // NOTE: At this point, Course-objects have been serialized so we need to access the private
+            // _work and _points properties (methods cannot be serialized).
             if (data.length > 0) {
                 data.forEach(d => {
                     output += `<tr class="new-item">
                     <td>${d.name}</td>
-                    <td>${d.points}</td>
-                    <td>${d.work}</td>
+                    <td>${d._points}</td>
+                    <td>${d._work}</td>
                 </tr>`;
                 });
             } else {
