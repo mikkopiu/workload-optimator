@@ -61,7 +61,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }
 
         _createClass(Optimator, [{
-            key: 'addCourse',
+            key: 'getCourseByInd',
+
+            /**
+             * Get a Course by its row index
+             * @param {Number} ind
+             * @returns {Course}
+             */
+            value: function getCourseByInd(ind) {
+                return this.courses[ind];
+            }
 
             /**
              * Add a Course to the Optimator.
@@ -69,6 +78,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
              * @method
              * @param {Course} course
              */
+
+        }, {
+            key: 'addCourse',
             value: function addCourse() {
                 var course = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
 
@@ -173,14 +185,24 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     })();
 
     var OptimatorForm = (function () {
-        function OptimatorForm(_ref) {
-            var courses = _ref.courses;
-            var maxHours = _ref.maxHours;
+        /* jshint ignore:start */
+
+        function OptimatorForm() {
+            var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+            var _ref$courses = _ref.courses;
+            var courses = _ref$courses === undefined ? [] : _ref$courses;
+            var _ref$maxHours = _ref.maxHours;
+            var maxHours = _ref$maxHours === undefined ? 0 : _ref$maxHours;
 
             _classCallCheck(this, OptimatorForm);
 
             this.optimator = new Optimator(courses, maxHours);
+            this._onSubmit = this._onSubmit.bind(this);
+            this._onAddRow = this._onAddRow.bind(this);
+            this._onRemoveRow = this._onRemoveRow.bind(this);
         }
+        /* jshint ignore:end */
 
         /**
          * Init the form.
@@ -190,25 +212,91 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         _createClass(OptimatorForm, [{
             key: 'init',
             value: function init() {
-                var _this = this;
-
+                var addBtn = document.getElementById('add-btn');
                 this._formEl = document.getElementById('courses-form');
+                this._coursesEl = document.getElementById('courses-table-body');
                 this._resultsEl = document.getElementById('results-table-body');
 
-                this._formEl.addEventListener('submit', function (evt) {
-                    return _this._onSubmit(evt);
-                });
+                var initialRowDeleteBtn = this.coursesEl.querySelector('.remove-btn');
+
+                // Clear out any previous listeners
+                this._formEl.removeEventListener('submit', this._onSubmit);
+                this._formEl.addEventListener('submit', this._onSubmit);
+                addBtn.removeEventListener('click', this._onAddRow);
+                addBtn.addEventListener('click', this._onAddRow);
+                initialRowDeleteBtn.removeEventListener('click', this._onRemoveRow);
+                initialRowDeleteBtn.addEventListener('click', this._onRemoveRow);
             }
+
+            /**
+             * @returns {Element|*}
+             */
+
         }, {
-            key: '_onSubmit',
+            key: 'addRow',
+
+            /**
+             * Add a row to the courses table
+             */
+            value: function addRow() {
+                var rowEl = document.createElement('tr');
+                rowEl.classList.add('input-row');
+                rowEl.innerHTML = '<td>\n                <input class="input-name" type="text" placeholder="Course name" required>\n            </td>\n            <td>\n                <input class="input-points" type="number" min="0" placeholder="Course points" required>\n            </td>\n            <td>\n                <input class="input-work" type="number" min="0" placeholder="Work required in hours" required>\n            </td>\n            <td>\n                <button class="remove-btn" type="button">Remove</button>\n            </td>';
+
+                rowEl.querySelector('.remove-btn').addEventListener('click', this._onRemoveRow);
+
+                this.coursesEl.appendChild(rowEl);
+            }
+
+            /**
+             * Remove a row from the courses table
+             * @param {Number} ind Row index to remove
+             */
+
+        }, {
+            key: 'removeRow',
+            value: function removeRow(ind) {
+                var targetRow = this.coursesEl.querySelectorAll('tr')[ind];
+                this.coursesEl.removeChild(targetRow);
+            }
+
+            /**
+             * Add row -button handler
+             * @param {MouseEvent} evt
+             * @private
+             */
+
+        }, {
+            key: '_onAddRow',
+            value: function _onAddRow(evt) {
+                evt.preventDefault();
+                this.addRow();
+            }
+
+            /**
+             * Remove-button handler
+             * @param {MouseEvent} evt
+             * @private
+             */
+
+        }, {
+            key: '_onRemoveRow',
+            value: function _onRemoveRow(evt) {
+                evt.preventDefault();
+                // rowIndex is 1-based
+                this.removeRow(evt.target.parentElement.parentElement.rowIndex - 1);
+            }
 
             /**
              * Optimize inputted courses on form submit,
              * and print the results.
              *
-             * @private
              * @param evt
+             * @private
              */
+
+        }, {
+            key: '_onSubmit',
             value: function _onSubmit(evt) {
                 evt.preventDefault();
                 console.warn('onSubmit not implemented!');
@@ -217,8 +305,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             /**
              * Print optimized results to the results table
              *
-             * @private
              * @param {Course[]} data
+             * @private
              */
 
         }, {
@@ -241,6 +329,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             get: function get() {
                 return this._formEl;
             }
+
+            /**
+             * @returns {Element|*}
+             */
+
+        }, {
+            key: 'coursesEl',
+            get: function get() {
+                return this._coursesEl;
+            }
+
+            /**
+             * @returns {Element|*}
+             */
+
         }, {
             key: 'resultsEl',
             get: function get() {
@@ -256,9 +359,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
      */
 
     function main() {
-        var FORM = new OptimatorForm({
-            courses: []
-        });
+        var FORM = new OptimatorForm();
         FORM.init();
     }
 

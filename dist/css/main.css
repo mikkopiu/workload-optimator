@@ -98,6 +98,9 @@ header {
   position: fixed;
   top: 0;
   background: #FFF;
+  -webkit-box-shadow: 0 0 2px rgba(34, 34, 34, 0.67);
+  -moz-box-shadow: 0 0 2px rgba(34, 34, 34, 0.67);
+  box-shadow: 0 0 2px rgba(34, 34, 34, 0.67);
 }
 .page-header {
   -ms-word-break: break-all;
@@ -117,6 +120,7 @@ header {
   margin: 0 auto;
   min-height: 100%;
   padding: 7.5rem 4rem;
+  float: left;
   background: #fc6e69;
 }
 .content h2 {

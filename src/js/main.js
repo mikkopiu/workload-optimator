@@ -85,6 +85,15 @@
         }
 
         /**
+         * Get a Course by its row index
+         * @param {Number} ind
+         * @returns {Course}
+         */
+        getCourseByInd(ind) {
+            return this.courses[ind];
+        }
+
+        /**
          * Add a Course to the Optimator.
          *
          * @method
@@ -135,35 +144,117 @@
     }
 
     class OptimatorForm {
-        constructor({courses, maxHours}) {
+        /* jshint ignore:start */
+        constructor({courses = [], maxHours = 0} = {}) {
             this.optimator = new Optimator(courses, maxHours);
+            this._onSubmit = this._onSubmit.bind(this);
+            this._onAddRow = this._onAddRow.bind(this);
+            this._onRemoveRow = this._onRemoveRow.bind(this);
         }
+        /* jshint ignore:end */
 
         /**
          * Init the form.
          * Sets event listeners.
          */
         init() {
+            let addBtn = document.getElementById('add-btn');
             this._formEl = document.getElementById('courses-form');
+            this._coursesEl = document.getElementById('courses-table-body');
             this._resultsEl = document.getElementById('results-table-body');
 
-            this._formEl.addEventListener('submit', evt => this._onSubmit(evt));
+            let initialRowDeleteBtn = this.coursesEl.querySelector('.remove-btn');
+
+            // Clear out any previous listeners
+            this._formEl.removeEventListener('submit', this._onSubmit);
+            this._formEl.addEventListener('submit', this._onSubmit);
+            addBtn.removeEventListener('click', this._onAddRow);
+            addBtn.addEventListener('click', this._onAddRow);
+            initialRowDeleteBtn.removeEventListener('click', this._onRemoveRow);
+            initialRowDeleteBtn.addEventListener('click', this._onRemoveRow);
         }
 
+        /**
+         * @returns {Element|*}
+         */
         get formEl() {
             return this._formEl;
         }
 
+        /**
+         * @returns {Element|*}
+         */
+        get coursesEl() {
+            return this._coursesEl;
+        }
+
+        /**
+         * @returns {Element|*}
+         */
         get resultsEl() {
             return this._resultsEl;
+        }
+
+        /**
+         * Add a row to the courses table
+         */
+        addRow() {
+            let rowEl = document.createElement('tr');
+            rowEl.classList.add('input-row');
+            rowEl.innerHTML = `<td>
+                <input class="input-name" type="text" placeholder="Course name" required>
+            </td>
+            <td>
+                <input class="input-points" type="number" min="0" placeholder="Course points" required>
+            </td>
+            <td>
+                <input class="input-work" type="number" min="0" placeholder="Work required in hours" required>
+            </td>
+            <td>
+                <button class="remove-btn" type="button">Remove</button>
+            </td>`;
+
+            rowEl.querySelector('.remove-btn').addEventListener('click', this._onRemoveRow);
+
+            this.coursesEl.appendChild(rowEl);
+        }
+
+        /**
+         * Remove a row from the courses table
+         * @param {Number} ind Row index to remove
+         */
+        removeRow(ind) {
+            let targetRow = this.coursesEl.querySelectorAll('tr')[ind];
+            this.coursesEl.removeChild(targetRow);
+        }
+
+        /**
+         * Add row -button handler
+         * @param {MouseEvent} evt
+         * @private
+         */
+        _onAddRow(evt) {
+            evt.preventDefault();
+            this.addRow();
+        }
+
+        /**
+         * Remove-button handler
+         * @param {MouseEvent} evt
+         * @private
+         */
+        _onRemoveRow(evt) {
+            evt.preventDefault();
+            // rowIndex is 1-based
+            this.removeRow(evt.target.parentElement.parentElement.rowIndex - 1);
         }
 
         /**
          * Optimize inputted courses on form submit,
          * and print the results.
          *
-         * @private
          * @param evt
+         * @private
          */
         _onSubmit(evt) {
             evt.preventDefault();
@@ -173,8 +264,8 @@
         /**
          * Print optimized results to the results table
          *
-         * @private
          * @param {Course[]} data
+         * @private
          */
         _printResults(data) {
             let output = '';
@@ -201,9 +292,7 @@
      * MAIN ENTRY POINT
      */
     function main() {
-        const FORM = new OptimatorForm({
-            courses: []
-        });
+        const FORM = new OptimatorForm();
         FORM.init();
     }
 
