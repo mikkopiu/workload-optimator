@@ -120,7 +120,6 @@ header {
   margin: 0 auto;
   min-height: 100%;
   padding: 7.5rem 4rem;
-  float: left;
   background: #fc6e69;
 }
 .content h2 {
@@ -132,8 +131,6 @@ header {
 section {
   width: 100%;
   margin-bottom: 2rem;
-  float: left;
-  clear: both;
 }
 #courses-form {
   width: 100%;
