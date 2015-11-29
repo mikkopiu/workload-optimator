@@ -83,18 +83,20 @@ function optimize(courses, maxHours) {
             for (courseInd = 0; courseInd <= numCourses; courseInd++) {
                 for (workInd = 0; workInd <= maxHours; workInd++) {
 
-                    // Caching items
+                    // Caching items (for huge values of maxHours or numCourses, i.e. huge arrays)
                     var rW = workMatrix[courseInd];
                     var rwPrev = workMatrix[courseInd - 1];
                     var rK = keepMatrix[courseInd];
                     var c = courses[courseInd - 1];
 
-                    // Fill top row (representing a knapsack that can fit 0 hours of work)
-                    // and left column with zeros.
+                    // Fill top row and left column with zeros (representing a knapsack that
+                    // can fit 0 hours of work, and 0 courses selected).
                     if (courseInd === 0 || workInd === 0) {
                         rW[workInd] = 0;
                     } else if (c._work <= workInd) {
-                        // If the Course will fit, compare the values of keeping it or leaving it
+                        // The Course will fit
+
+                        // Compare the values of keeping it or leaving it
                         maxNew = c._points + rwPrev[workInd - c._work];
                         maxPrev = rwPrev[workInd];
 
@@ -103,12 +105,14 @@ function optimize(courses, maxHours) {
                             rW[workInd] = maxNew;
                             rK[workInd] = 1;
                         } else {
+                            // Previous maximum was better
+                            // => keep the previous maximum
                             rW[workInd] = maxPrev;
                             rK[workInd] = 0;
                         }
                     } else {
-                        // Else, the course can't fit
-                        // => points and work are the same as before.
+                        // The Course won't fit
+                        // => points and work are the same as the previous ones.
                         rW[workInd] = rwPrev[workInd];
                     }
                 }
@@ -118,9 +122,10 @@ function optimize(courses, maxHours) {
             workInd = maxHours;
             courseInd = numCourses;
             for (courseInd; courseInd > 0; courseInd--) {
+                // In the keepMatrix, items marked as 1 are to be kept
                 if (keepMatrix[courseInd][workInd] === 1) {
                     optimized.push(courses[courseInd - 1]);
-                    totalWork += courses[courseInd - 1]._work;
+                    totalWork += courses[courseInd - 1]._work; // Count the total work amount
                     workInd = workInd - courses[courseInd - 1]._work;
                 }
             }
