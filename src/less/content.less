@@ -24,7 +24,7 @@
 
 section {
     width: 100%;
-    margin-bottom: 2rem;
+    margin-bottom: 3rem;
 }
 
 .instructions {
@@ -35,13 +35,10 @@ section {
 
 #courses-form {
     width: 100%;
-    float: left;
 }
 
 .courses, .form-actions, .total-hours {
     width: 100%;
-    float: left;
-    clear: both;
     margin-bottom: 1rem;
 }
 
@@ -71,18 +68,17 @@ section {
 }
 
 .total-hours {
+    display: flex;
+    flex-direction: column;
+
     label {
         font-weight: 700;
-        float: left;
-        clear: both;
         margin-bottom: 0.5rem;
     }
 }
 
 #total-hours-input {
     max-width: 200px;
-    float: left;
-    clear: both;
 }
 
 .new-item {

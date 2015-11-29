@@ -21,7 +21,6 @@ button {
   font-weight: 700;
   text-transform: uppercase;
   padding: 0.5rem;
-  float: left;
   border-radius: 5px;
   text-decoration: none;
   background-color: #fff;
@@ -130,18 +129,15 @@ header {
 }
 section {
   width: 100%;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 }
 #courses-form {
   width: 100%;
-  float: left;
 }
 .courses,
 .form-actions,
 .total-hours {
   width: 100%;
-  float: left;
-  clear: both;
   margin-bottom: 1rem;
 }
 .courses {
@@ -161,16 +157,16 @@ section {
 .form-actions button {
   margin-right: 1rem;
 }
+.total-hours {
+  display: flex;
+  flex-direction: column;
+}
 .total-hours label {
   font-weight: 700;
-  float: left;
-  clear: both;
   margin-bottom: 0.5rem;
 }
 #total-hours-input {
   max-width: 200px;
-  float: left;
-  clear: both;
 }
 .new-item {
   opacity: 0;
