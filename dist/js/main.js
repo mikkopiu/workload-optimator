@@ -113,46 +113,49 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                         /**
                          * The Knapsack algorithm
+                         * Based on:
+                         * https://www.youtube.com/watch?v=EH6h7WA7sDw &
+                         * https://gist.github.com/danwoods/7496329
                          */
 
                         var courseInd = undefined;
-                        var workInd = 0;
-                        var maxPrev = 0;
-                        var maxNew = 0;
+                        var workInd = undefined;
+                        var maxPrev = undefined;
+                        var maxNew = undefined;
 
                         // Setup matrices (create (numCourses + 1) * (maxHours +1) sized empty Arrays)
-                        var weightMatrix = Array.apply(null, Array(numCourses + 1)).map(function () {
+                        var workMatrix = Array.apply(null, Array(numCourses + 1)).map(function () {
                             return new Array(_this.maxHours + 1);
                         });
                         var keepMatrix = Array.apply(null, Array(numCourses + 1)).map(function () {
                             return new Array(_this.maxHours + 1);
                         });
 
-                        // Build weightMatrix from [0][0] => [numCourses-1][numCourses-1]
+                        // Build the workMatrix
                         for (courseInd = 0; courseInd <= numCourses; courseInd++) {
                             for (workInd = 0; workInd <= this.maxHours; workInd++) {
 
-                                // Fill top row and left column with zeros
+                                // Fill top row (representing a knapsack that can fit 0 hours of work)
+                                // and left column with zeros.
                                 if (courseInd === 0 || workInd === 0) {
-                                    weightMatrix[courseInd][workInd] = 0;
+                                    workMatrix[courseInd][workInd] = 0;
                                 } else if (this.courses[courseInd - 1].work <= workInd) {
-                                    // If item will fit, decide if there's greater value
-                                    // in keeping it, or leaving it.
-                                    maxNew = this.courses[courseInd - 1].points + weightMatrix[courseInd - 1][workInd - this.courses[courseInd - 1].work];
-                                    maxPrev = weightMatrix[courseInd - 1][workInd];
+                                    // If the Course will fit, compare the values of keeping it or leaving it
+                                    maxNew = this.courses[courseInd - 1].points + workMatrix[courseInd - 1][workInd - this.courses[courseInd - 1].work];
+                                    maxPrev = workMatrix[courseInd - 1][workInd];
 
                                     // Update the matrices
                                     if (maxNew > maxPrev) {
-                                        weightMatrix[courseInd][workInd] = maxNew;
+                                        workMatrix[courseInd][workInd] = maxNew;
                                         keepMatrix[courseInd][workInd] = 1;
                                     } else {
-                                        weightMatrix[courseInd][workInd] = maxPrev;
+                                        workMatrix[courseInd][workInd] = maxPrev;
                                         keepMatrix[courseInd][workInd] = 0;
                                     }
                                 } else {
                                     // Else, the course can't fit
                                     // => points and work are the same as before.
-                                    weightMatrix[courseInd][workInd] = weightMatrix[courseInd - 1][workInd];
+                                    workMatrix[courseInd][workInd] = workMatrix[courseInd - 1][workInd];
                                 }
                             }
                         }
@@ -164,11 +167,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         for (courseInd; courseInd > 0; courseInd--) {
                             if (keepMatrix[courseInd][workInd] === 1) {
                                 optimized.push(this.courses[courseInd - 1]);
+                                totalWork += this.courses[courseInd - 1].work;
                                 workInd = workInd - this.courses[courseInd - 1].work;
                             }
                         }
 
-                        totalPts = weightMatrix[numCourses][this.maxHours];
+                        totalPts = workMatrix[numCourses][this.maxHours];
                     }
                 }
 
