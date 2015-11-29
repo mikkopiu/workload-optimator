@@ -14,24 +14,46 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
      */
     ;
 
-    var Course =
+    var Course = (function () {
 
-    /**
-     * Course must have a name,
-     * amount of points awarded and work required (in hours).
-     *
-     * @constructor
-     * @param {String} name Course name
-     * @param {Number} points Points awarded on completion
-     * @param {Number} work Work required to complete, in hours
-     */
-    function Course(name, points, work) {
-        _classCallCheck(this, Course);
+        /**
+         * Course must have a name,
+         * amount of points awarded and work required (in hours).
+         *
+         * @constructor
+         * @param {String} name Course name
+         * @param {Number} points Points awarded on completion
+         * @param {Number} work Work required to complete, in hours
+         */
 
-        this.name = name;
-        this.points = points;
-        this.work = work;
-    };
+        function Course(name, points, work) {
+            _classCallCheck(this, Course);
+
+            this.name = name;
+            this.points = points;
+            this.work = work;
+        }
+
+        _createClass(Course, [{
+            key: 'points',
+            get: function get() {
+                return this._points;
+            },
+            set: function set(p) {
+                this._points = p >= 0 ? p : 0;
+            }
+        }, {
+            key: 'work',
+            get: function get() {
+                return this._work;
+            },
+            set: function set(p) {
+                this._work = p >= 0 ? p : 0;
+            }
+        }]);
+
+        return Course;
+    })();
 
     /**
      * Optimator model
@@ -56,18 +78,50 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
             _classCallCheck(this, Optimator);
 
-            this._courses = courses;
-            this._maxHours = maxHours;
+            this.courses = courses;
+            this.maxHours = maxHours;
         }
 
         _createClass(Optimator, [{
-            key: 'getCourseByInd',
+            key: 'getOptimizedCourses',
+
+            /**
+             * Optimize course selections
+             * @returns {{keep: Array, totalPts: number, totalWork: number}}
+             */
+            value: function getOptimizedCourses() {
+                var v = [];
+                var keep = [];
+                var totalPts = 0;
+                var totalWork = 0;
+
+                // Skip the algorithm completely if there aren't any courses or
+                // if we don't have any hours to fill up
+                if (this.maxHours > 0 && this.courses.length > 0) {
+
+                    // No need for the algorithm also
+                    // if we only have one course to fit.
+                    if (this.courses.length === 1) {
+                        keep.push(this.courses[0]);
+                        totalPts = this.courses[0].points;
+                        totalWork = this.courses[0].work;
+                    } else {
+                        // TODO: actual work
+                        console.warn('Doing actual work');
+                    }
+                }
+
+                return { keep: keep, totalPts: totalPts, totalWork: totalWork };
+            }
 
             /**
              * Get a Course by its row index
              * @param {Number} ind
              * @returns {Course}
              */
+
+        }, {
+            key: 'getCourseByInd',
             value: function getCourseByInd(ind) {
                 return this.courses[ind];
             }
@@ -135,6 +189,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     throw new Error('Give a course to remove!');
                 }
             }
+
+            /**
+             * Clear all Courses
+             */
+
+        }, {
+            key: 'clearCourses',
+            value: function clearCourses() {
+                this.courses = [];
+            }
         }, {
             key: 'maxHours',
             get: function get() {
@@ -149,7 +213,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
              */
             ,
             set: function set(hours) {
-                if (hours >= 0) {
+                if (!isNaN(hours) && hours >= 0) {
                     this._maxHours = hours;
                 } else {
                     throw new Error('maxHours must be a positive number!');
@@ -210,9 +274,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             key: 'init',
             value: function init() {
                 var addBtn = document.getElementById('add-btn');
+                this._totalHoursInputEl = document.getElementById('total-hours-input');
                 this._formEl = document.getElementById('courses-form');
                 this._coursesEl = document.getElementById('courses-table-body');
-                this._resultsEl = document.getElementById('results-table-body');
+                this._resultsBodyEl = document.getElementById('results-table-body');
+                this._totalPointsEl = document.getElementById('total-points');
+                this._totalWorkEl = document.getElementById('total-work');
 
                 var initialRowDeleteBtn = this.coursesEl.querySelector('.remove-btn');
 
@@ -224,11 +291,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 initialRowDeleteBtn.removeEventListener('click', this._onRemoveRow);
                 initialRowDeleteBtn.addEventListener('click', this._onRemoveRow);
             }
-
-            /**
-             * @returns {Element|*}
-             */
-
         }, {
             key: 'addRow',
 
@@ -296,19 +358,46 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             key: '_onSubmit',
             value: function _onSubmit(evt) {
                 evt.preventDefault();
-                console.warn('onSubmit not implemented!');
+
+                this.optimator.maxHours = OptimatorForm._parseToPositiveFloat(this.totalHoursInputEl.value);
+                var rows = this.coursesEl.querySelectorAll('.input-row');
+
+                this.optimator.clearCourses();
+
+                for (var i = 0; i < rows.length; i++) {
+                    this.optimator.addCourse(new Course(rows[i].querySelector('.input-name').value, OptimatorForm._parseToPositiveFloat(rows[i].querySelector('.input-points').value), OptimatorForm._parseToPositiveFloat(rows[i].querySelector('.input-work').value)));
+                }
+
+                var _optimator$getOptimiz = this.optimator.getOptimizedCourses();
+
+                var optimized = _optimator$getOptimiz.keep;
+                var totalPts = _optimator$getOptimiz.totalPts;
+                var totalWork = _optimator$getOptimiz.totalWork;
+
+                this._printResults(optimized, totalPts, totalWork);
             }
 
             /**
-             * Print optimized results to the results table
+             * Parse a String (work hours / points) to a positive float.
              *
-             * @param {Course[]} data
+             * @param {String} str Work hours or points
+             * @returns {number} Parsed float
+             * @static
              * @private
              */
 
         }, {
             key: '_printResults',
-            value: function _printResults(data) {
+
+            /**
+             * Print optimized results to the results table
+             *
+             * @param {Course[]} data
+             * @param {Number} totalPoints
+             * @param {Number} totalWork
+             * @private
+             */
+            value: function _printResults(data, totalPoints, totalWork) {
                 var output = '';
 
                 if (data.length > 0) {
@@ -316,11 +405,23 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         output += '<tr class="new-item">\n                    <td>' + d.name + '</td>\n                    <td>' + d.points + '</td>\n                    <td>' + d.work + '</td>\n                </tr>';
                     });
                 } else {
-                    output = '<tr class="new-item">\n                    <td colspan="3" class="empty-row">No courses added</td>\n                </tr>';
+                    output = '<tr class="new-item">\n                    <td colspan="3" class="empty-row">No courses selected</td>\n                </tr>';
                 }
 
-                this._resultsEl.innerHTML = output;
+                this.resultsBodyEl.innerHTML = output;
+                this.totalPointsEl.innerHTML = totalPoints;
+                this.totalWorkEl.innerHTML = totalWork;
             }
+        }, {
+            key: 'totalHoursInputEl',
+            get: function get() {
+                return this._totalHoursInputEl;
+            }
+
+            /**
+             * @returns {Element|*}
+             */
+
         }, {
             key: 'formEl',
             get: function get() {
@@ -342,9 +443,31 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
              */
 
         }, {
-            key: 'resultsEl',
+            key: 'resultsBodyEl',
             get: function get() {
-                return this._resultsEl;
+                return this._resultsBodyEl;
+            }
+        }, {
+            key: 'totalPointsEl',
+            get: function get() {
+                return this._totalPointsEl;
+            }
+        }, {
+            key: 'totalWorkEl',
+            get: function get() {
+                return this._totalWorkEl;
+            }
+        }], [{
+            key: '_parseToPositiveFloat',
+            value: function _parseToPositiveFloat(str) {
+                var num = 0;
+
+                if (str !== '') {
+                    var parsed = parseFloat(str.replace(',', '.'));
+                    num = parsed >= 0 ? parsed : 0;
+                }
+
+                return num;
             }
         }]);
 

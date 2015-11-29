@@ -30,7 +30,7 @@
         <form id="courses-form" name="courses-form">
             <div class="total-hours">
                 <label for="total-hours-input">Total amount of hours to fill</label>
-                <input id="total-hours-input" name="total-hours" type="number" placeholder="Full hours">
+                <input id="total-hours-input" name="total-hours" type="number" placeholder="Full hours" min="0" required>
             </div>
             <div class="courses">
                 <table>
@@ -78,7 +78,7 @@
             </thead>
             <tbody id="results-table-body">
             <tr>
-                <td colspan="3" class="empty-row">No courses added</td>
+                <td colspan="3" class="empty-row">No courses selected</td>
             </tr>
             </tbody>
             <tfoot>

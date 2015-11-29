@@ -22,6 +22,22 @@
             this.points = points;
             this.work = work;
         }
+
+        get points() {
+            return this._points;
+        }
+
+        set points(p) {
+            this._points = p >= 0 ? p : 0;
+        }
+
+        get work() {
+            return this._work;
+        }
+
+        set work(p) {
+            this._work = p >= 0 ? p : 0;
+        }
     }
 
     /**
@@ -40,8 +56,8 @@
          * @param {Number} [maxHours=0] Maximum amount of amount available
          */
         constructor(courses = [], maxHours = 0) {
-            this._courses = courses;
-            this._maxHours = maxHours;
+            this.courses = courses;
+            this.maxHours = maxHours;
         }
 
         get maxHours() {
@@ -55,7 +71,7 @@
          * @param hours
          */
         set maxHours(hours) {
-            if (hours >= 0) {
+            if (!isNaN(hours) && hours >= 0) {
                 this._maxHours = hours;
             } else {
                 throw new Error('maxHours must be a positive number!');
@@ -82,6 +98,35 @@
             } else {
                 throw new Error('courses must be an Array!');
             }
+        }
+
+        /**
+         * Optimize course selections
+         * @returns {{keep: Array, totalPts: number, totalWork: number}}
+         */
+        getOptimizedCourses() {
+            let v = [];
+            let keep = [];
+            let totalPts = 0;
+            let totalWork = 0;
+
+            // Skip the algorithm completely if there aren't any courses or
+            // if we don't have any hours to fill up
+            if (this.maxHours > 0 && this.courses.length > 0) {
+
+                // No need for the algorithm also
+                // if we only have one course to fit.
+                if (this.courses.length === 1) {
+                    keep.push(this.courses[0]);
+                    totalPts = this.courses[0].points;
+                    totalWork = this.courses[0].work;
+                } else {
+                    // TODO: actual work
+                    console.warn('Doing actual work');
+                }
+            }
+
+            return {keep, totalPts, totalWork};
         }
 
         /**
@@ -141,6 +186,13 @@
                 throw new Error('Give a course to remove!');
             }
         }
+
+        /**
+         * Clear all Courses
+         */
+        clearCourses() {
+            this.courses = [];
+        }
     }
 
     class OptimatorForm {
@@ -157,9 +209,12 @@
          */
         init() {
             let addBtn = document.getElementById('add-btn');
+            this._totalHoursInputEl = document.getElementById('total-hours-input');
             this._formEl = document.getElementById('courses-form');
             this._coursesEl = document.getElementById('courses-table-body');
-            this._resultsEl = document.getElementById('results-table-body');
+            this._resultsBodyEl = document.getElementById('results-table-body');
+            this._totalPointsEl = document.getElementById('total-points');
+            this._totalWorkEl = document.getElementById('total-work');
 
             let initialRowDeleteBtn = this.coursesEl.querySelector('.remove-btn');
 
@@ -170,6 +225,10 @@
             addBtn.addEventListener('click', this._onAddRow);
             initialRowDeleteBtn.removeEventListener('click', this._onRemoveRow);
             initialRowDeleteBtn.addEventListener('click', this._onRemoveRow);
+        }
+
+        get totalHoursInputEl() {
+            return this._totalHoursInputEl;
         }
 
         /**
@@ -189,8 +248,16 @@
         /**
          * @returns {Element|*}
          */
-        get resultsEl() {
-            return this._resultsEl;
+        get resultsBodyEl() {
+            return this._resultsBodyEl;
+        }
+
+        get totalPointsEl() {
+            return this._totalPointsEl;
+        }
+
+        get totalWorkEl() {
+            return this._totalWorkEl;
         }
 
         /**
@@ -256,16 +323,52 @@
          */
         _onSubmit(evt) {
             evt.preventDefault();
-            console.warn('onSubmit not implemented!');
+
+            this.optimator.maxHours = OptimatorForm._parseToPositiveFloat(this.totalHoursInputEl.value);
+            let rows = this.coursesEl.querySelectorAll('.input-row');
+
+            this.optimator.clearCourses();
+
+            for (let i = 0; i < rows.length; i++) {
+                this.optimator.addCourse(new Course(
+                    rows[i].querySelector('.input-name').value,
+                    OptimatorForm._parseToPositiveFloat(rows[i].querySelector('.input-points').value),
+                    OptimatorForm._parseToPositiveFloat(rows[i].querySelector('.input-work').value)
+                ));
+            }
+
+            let {keep:optimized, totalPts, totalWork} = this.optimator.getOptimizedCourses();
+            this._printResults(optimized, totalPts, totalWork);
+        }
+
+        /**
+         * Parse a String (work hours / points) to a positive float.
+         *
+         * @param {String} str Work hours or points
+         * @returns {number} Parsed float
+         * @static
+         * @private
+         */
+        static _parseToPositiveFloat(str) {
+            let num = 0;
+
+            if (str !== '') {
+                let parsed = parseFloat(str.replace(',', '.'));
+                num = parsed >= 0 ? parsed : 0;
+            }
+
+            return num;
         }
 
         /**
          * Print optimized results to the results table
          *
          * @param {Course[]} data
+         * @param {Number} totalPoints
+         * @param {Number} totalWork
          * @private
          */
-        _printResults(data) {
+        _printResults(data, totalPoints, totalWork) {
             let output = '';
 
             if (data.length > 0) {
@@ -278,11 +381,13 @@
                 });
             } else {
                 output = `<tr class="new-item">
-                    <td colspan="3" class="empty-row">No courses added</td>
+                    <td colspan="3" class="empty-row">No courses selected</td>
                 </tr>`;
             }
 
-            this._resultsEl.innerHTML = output;
+            this.resultsBodyEl.innerHTML = output;
+            this.totalPointsEl.innerHTML = totalPoints;
+            this.totalWorkEl.innerHTML = totalWork;
         }
     }
 
