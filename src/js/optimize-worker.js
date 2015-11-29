@@ -64,6 +64,11 @@ function optimize(courses, maxHours) {
                 keepMatrix[courseInd] = new Array(maxHours + 1);
             }
 
+            // Sort the courses by work.
+            // This makes the algorithm choose the course with the least amount of work,
+            // when for example: maxHours = 10, course1 = 5 points & 6h, course2 = 5p & 6h (i.e. both don't fit).
+            courses.sort((a, b) => a._work - b._work);
+
             // Build the workMatrix
             for (courseInd = 0; courseInd <= numCourses; courseInd++) {
                 for (workInd = 0; workInd <= maxHours; workInd++) {
