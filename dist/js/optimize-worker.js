@@ -96,8 +96,12 @@ function optimize(courses, maxHours) {
                     } else if (c._work <= workInd) {
                         // The Course will fit
 
-                        // Compare the values of keeping it or leaving it
+                        // Compare the value of keeping it or leaving it:
+                        //
+                        // Combine the points of this course with the best points
+                        // that fit in the remaining space after adding this course
                         maxNew = c._points + rwPrev[workInd - c._work];
+                        // and compare it to the point value of the previous row at the same position.
                         maxPrev = rwPrev[workInd];
 
                         // Update the matrices
